@@ -74,9 +74,9 @@ interface Storage {
     fun getComplicationColors(): ComplicationColors
     fun setComplicationColors(complicationColors: ComplicationColors)
     fun watchComplicationColors(): Flow<ComplicationColors>
-    fun isUserPremium(): Boolean
-    fun setUserPremium(premium: Boolean)
-    fun watchIsUserPremium(): Flow<Boolean>
+//    fun isUserPremium(): Boolean
+//    fun setUserPremium(premium: Boolean)
+//    fun watchIsUserPremium(): Flow<Boolean>
     fun setUse24hTimeFormat(use: Boolean)
     fun getUse24hTimeFormat(): Boolean
     fun watchUse24hTimeFormat(): Flow<Boolean>
@@ -324,11 +324,11 @@ class StorageImpl(
 
     override fun watchComplicationColors(): StateFlow<ComplicationColors> = cacheComplicationsColorMutableFlow
 
-    override fun isUserPremium(): Boolean = isPremiumUserCache.get()
+//    override fun isUserPremium(): Boolean = isPremiumUserCache.get()
 
-    override fun setUserPremium(premium: Boolean) = isPremiumUserCache.set(premium)
+//    override fun setUserPremium(premium: Boolean) = isPremiumUserCache.set(true)
 
-    override fun watchIsUserPremium(): Flow<Boolean> = isPremiumUserCache.watchChanges()
+//    override fun watchIsUserPremium(): Flow<Boolean> = isPremiumUserCache.watchChanges()
 
     override fun setUse24hTimeFormat(use: Boolean) = use24hFormatCache.set(use)
 

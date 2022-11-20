@@ -688,8 +688,7 @@ class PixelMinimalWatchFace : CanvasWatchFaceService() {
                             return
                         }
                     }
-                    if (storage.isUserPremium() &&
-                        storage.showPhoneBattery() &&
+                    if (storage.showPhoneBattery() &&
                         phoneBatteryStatus.isStale(System.currentTimeMillis()) &&
                         watchFaceDrawer.tapIsOnBattery(x, y)) {
                         startActivity(Intent(this@PixelMinimalWatchFace, PhoneBatteryConfigurationActivity::class.java).apply {
@@ -697,8 +696,7 @@ class PixelMinimalWatchFace : CanvasWatchFaceService() {
                         })
                         return
                     }
-                    if (storage.isUserPremium() &&
-                        storage.isNotificationsSyncActivated() &&
+                    if (storage.isNotificationsSyncActivated() &&
                         watchFaceDrawer.isTapOnNotifications(x, y)) {
 
                         when(val currentState = phoneNotifications.notificationsStateFlow.value) {
@@ -739,7 +737,7 @@ class PixelMinimalWatchFace : CanvasWatchFaceService() {
             }
 
             // Update weather subscription if needed
-            if( storage.showWeather() != shouldShowWeather && storage.isUserPremium() ) {
+            if( storage.showWeather() != shouldShowWeather ) {
                 shouldShowWeather = storage.showWeather()
 
                 if( shouldShowWeather ) {
@@ -751,8 +749,7 @@ class PixelMinimalWatchFace : CanvasWatchFaceService() {
             }
 
             // Update battery subscription if needed
-            if( storage.isUserPremium() &&
-                (storage.showWatchBattery() != shouldShowBattery || (hasWidgetFrozenBug && !didForceGalaxyWatch4BatterySubscription)) ) {
+            if( (storage.showWatchBattery() != shouldShowBattery || (hasWidgetFrozenBug && !didForceGalaxyWatch4BatterySubscription)) ) {
                 shouldShowBattery = storage.showWatchBattery()
                 didForceGalaxyWatch4BatterySubscription = true
 
@@ -923,12 +920,13 @@ class PixelMinimalWatchFace : CanvasWatchFaceService() {
         }
 
         private fun handleIsPremiumCallback(isPremium: Boolean) {
-            val wasPremium = storage.isUserPremium()
-            storage.setUserPremium(isPremium)
-
-            if( !wasPremium && isPremium ) {
-                Toast.makeText(service, R.string.premium_confirmation, Toast.LENGTH_LONG).show()
-            }
+            Log.d(TAG, "handleIsPremiumCallback() called with: isPremium = $isPremium")
+//            val wasPremium = storage.isUserPremium()
+//            storage.setUserPremium(isPremium)
+//
+//            if( !wasPremium && isPremium ) {
+//                Toast.makeText(service, R.string.premium_confirmation, Toast.LENGTH_LONG).show()
+//            }
 
             invalidate()
         }

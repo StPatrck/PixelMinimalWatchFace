@@ -88,9 +88,6 @@ class SettingsActivity : ComponentActivity() {
         lifecycleScope.launch {
             storage.watchUseAndroid12Style()
                 .mapLatest { useAndroid12 ->
-                    storage.watchIsUserPremium()
-                        .first { it }
-
                     useAndroid12
                 }
                 .collect { useAndroid12 ->
@@ -115,7 +112,6 @@ class SettingsActivity : ComponentActivity() {
         val isScreenRound = remember { context.isScreenRound() }
         val weatherProviderInfo = remember { context.getWeatherProviderInfo() }
         val useAndroid12 by storage.watchUseAndroid12Style().collectAsState(storage.useAndroid12Style())
-        val isUserPremium by storage.watchIsUserPremium().collectAsState(storage.isUserPremium())
         val showWatchBattery by storage.watchShowWatchBattery().collectAsState(storage.showWatchBattery())
         val showPhoneBattery by storage.watchShowPhoneBattery().collectAsState(storage.showPhoneBattery())
         val showNotifications by storage.watchIsNotificationsSyncActivated().collectAsState(storage.isNotificationsSyncActivated())
@@ -143,7 +139,6 @@ class SettingsActivity : ComponentActivity() {
                 }
 
                 WidgetsOrBecomePremiumSection(
-                    isUserPremium = isUserPremium,
                     useAndroid12 = useAndroid12,
                     showPhoneBattery = showPhoneBattery,
                     showWatchBattery = showWatchBattery,
@@ -151,23 +146,22 @@ class SettingsActivity : ComponentActivity() {
                     showWearOSLogo = showWearOSLogo,
                 )
 
-                if (isUserPremium) {
+
                     BatteryIndicatorSection(
                         useAndroid12 = useAndroid12,
                         showWatchBattery = showWatchBattery,
                         showComplicationsColorInAmbient = showComplicationsColorInAmbient,
                     )
-                }
 
-                if (isUserPremium) {
+
+
                     NotificationsDisplaySection(
                         useAndroid12 = useAndroid12,
                         showComplicationsColorInAmbient = showComplicationsColorInAmbient,
                     )
-                }
+
 
                 DateTimeSection(
-                    isUserPremium = isUserPremium,
                     isScreenRound = isScreenRound,
                     weatherProviderInfo = weatherProviderInfo,
                     showComplicationsColorInAmbient = showComplicationsColorInAmbient,
@@ -176,7 +170,6 @@ class SettingsActivity : ComponentActivity() {
                 TimeStyleSection()
 
                 AmbientSection(
-                    isUserPremium = isUserPremium,
                     showWatchBattery = showWatchBattery,
                     showPhoneBattery = showPhoneBattery,
                     showNotifications = showNotifications,
@@ -185,9 +178,7 @@ class SettingsActivity : ComponentActivity() {
                     showComplicationsColorInAmbient = showComplicationsColorInAmbient,
                 )
 
-                SupportSection(
-                    isUserPremium = isUserPremium,
-                )
+                SupportSection()
 
                 item(key = "FooterVersion") {
                     Text(
@@ -206,7 +197,6 @@ class SettingsActivity : ComponentActivity() {
     }
 
     private fun LazyListScope.WidgetsOrBecomePremiumSection(
-        isUserPremium: Boolean,
         useAndroid12: Boolean,
         showPhoneBattery: Boolean,
         showWatchBattery: Boolean,
@@ -215,8 +205,7 @@ class SettingsActivity : ComponentActivity() {
     ) {
 
 
-        if (isUserPremium) {
-            item(key = "WidgetsSection") { SettingSectionItem(label = "Widgets") }
+        item(key = "WidgetsSection") { SettingSectionItem(label = "Widgets") }
 
             if (useAndroid12) {
                 item(key = "Android12Complications") {
@@ -234,56 +223,21 @@ class SettingsActivity : ComponentActivity() {
                 val widgetsSize by storage.watchWidgetsSize().collectAsState(storage.getWidgetsSize())
                 val context = LocalContext.current
 
-                SettingSlider(
-                    iconDrawable = R.drawable.ic_baseline_photo_size_select_small_24,
-                    onValueChange = { newValue ->
-                        storage.setWidgetsSize(newValue)
-                    },
-                    value = widgetsSize,
-                    title = "Size of widgets: ${context.fontDisplaySizeToHumanReadableString(widgetsSize)}",
-                    modifier = Modifier.padding(top = 6.dp),
-                )
-            }
-        } else {
-            item(key = "PremiumSection") { SettingSectionItem(label = "Premium features") }
-
-            item(key = "PremiumCompanion") {
-                Column {
-                    Text(
-                        text = "To setup widgets, display weather, battery indicators and notification icons you have to become a premium user.",
-                        textAlign = TextAlign.Center,
-                        modifier = Modifier.fillParentMaxWidth(),
-                    )
-
-                    Text(
-                        text = "You can buy it from the phone companion app and sync it with your watch to setup premium features right here.",
-                        textAlign = TextAlign.Center,
-                        modifier = Modifier.fillParentMaxWidth(),
-                    )
-
-                    SettingChip(
-                        label ="Become premium",
-                        onClick = ::openAppOnPhone,
-                        iconDrawable = R.drawable.ic_baseline_stars_24,
-                        modifier = Modifier.padding(top = 6.dp),
-                    )
-
-                    Text(
-                        text = "Already bought premium? Sync it from the phone app using the \"Troubleshoot\" button.",
-                        textAlign = TextAlign.Center,
-                        fontSize = 12.sp,
-                        modifier = Modifier
-                            .fillParentMaxWidth()
-                            .padding(top = 10.dp),
-                    )
-                }
-            }
+            SettingSlider(
+                iconDrawable = R.drawable.ic_baseline_photo_size_select_small_24,
+                onValueChange = { newValue ->
+                    storage.setWidgetsSize(newValue)
+                },
+                value = widgetsSize,
+                title = "Size of widgets: ${context.fontDisplaySizeToHumanReadableString(widgetsSize)}",
+                modifier = Modifier.padding(top = 6.dp),
+            )
         }
 
         if (!showNotifications || !useAndroid12) {
             item(key = "ShowWearOSLogo") {
                 SettingToggleChip(
-                    label = if (useAndroid12 || !isUserPremium) { "Show WearOS logo" } else { "WearOS logo as middle widget" },
+                    label = if (useAndroid12) { "Show WearOS logo" } else { "WearOS logo as middle widget" },
                     checked = showWearOSLogo,
                     onCheckedChange = { storage.setShowWearOSLogo(it) },
                     iconDrawable = R.drawable.ic_wear_os_logo_white,
@@ -433,7 +387,6 @@ class SettingsActivity : ComponentActivity() {
     }
 
     private fun LazyListScope.DateTimeSection(
-        isUserPremium: Boolean,
         isScreenRound: Boolean,
         weatherProviderInfo: WeatherProviderInfo?,
         showComplicationsColorInAmbient: Boolean,
@@ -457,7 +410,7 @@ class SettingsActivity : ComponentActivity() {
             )
         }
 
-        if( isUserPremium && weatherProviderInfo != null ) {
+        if( weatherProviderInfo != null ) {
             item(key = "ShowWeather") {
                 val showWeather by storage.watchShowWeather().collectAsState(storage.showWeather())
                 val context = LocalContext.current
@@ -653,7 +606,6 @@ class SettingsActivity : ComponentActivity() {
     }
 
     private fun LazyListScope.AmbientSection(
-        isUserPremium: Boolean,
         showWatchBattery: Boolean,
         showPhoneBattery: Boolean,
         showNotifications: Boolean,
@@ -678,7 +630,7 @@ class SettingsActivity : ComponentActivity() {
             )
         }
 
-        if (isUserPremium) {
+        if (true) {
             item(key= "ComplicationsInAmbientMode") {
                 val showComplicationsInAmbient by storage.watchShowComplicationsInAmbientMode().collectAsState(storage.showComplicationsInAmbientMode())
 
@@ -691,7 +643,7 @@ class SettingsActivity : ComponentActivity() {
             }
         }
 
-        if (isUserPremium && (showWatchBattery || showPhoneBattery)) {
+        if (showWatchBattery || showPhoneBattery) {
             item(key = "ShowBatteryInAmbientMode") {
                 val hideBatteryInAmbient by storage.watchHideBatteryInAmbient().collectAsState(storage.hideBatteryInAmbient())
 
@@ -705,7 +657,7 @@ class SettingsActivity : ComponentActivity() {
             }
         }
 
-        if (isUserPremium && showNotifications) {
+        if (showNotifications) {
             item(key = "ShowNotificationsInAmbientMode") {
                 val showNotificationsInAmbient by storage.watchShowNotificationsInAmbient().collectAsState(storage.getShowNotificationsInAmbient())
 
@@ -732,7 +684,7 @@ class SettingsActivity : ComponentActivity() {
                 )
             }
         }
-        
+
         if (Device.isWearOS3) {
             item(key = "showColorsInAmbient") {
                 SettingToggleChip(
@@ -747,9 +699,7 @@ class SettingsActivity : ComponentActivity() {
         }
     }
 
-    private fun LazyListScope.SupportSection(
-        isUserPremium: Boolean
-    ) {
+    private fun LazyListScope.SupportSection() {
         item(key = "SupportSection") {
             SettingSectionItem(
                 label = "Support",
@@ -767,14 +717,12 @@ class SettingsActivity : ComponentActivity() {
             )
         }
 
-        if (isUserPremium) {
-            item(key = "Donate") {
-                SettingChip(
-                    label = "Donate to support development",
-                    onClick = ::openAppForDonationOnPhone,
-                    iconDrawable = R.drawable.ic_baseline_add_reaction,
-                )
-            }
+        item(key = "Donate") {
+            SettingChip(
+                label = "Donate to support development",
+                onClick = ::openAppForDonationOnPhone,
+                iconDrawable = R.drawable.ic_baseline_add_reaction,
+            )
         }
     }
 

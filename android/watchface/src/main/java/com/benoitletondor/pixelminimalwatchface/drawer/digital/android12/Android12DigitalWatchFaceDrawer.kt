@@ -202,8 +202,8 @@ class Android12DigitalWatchFaceDrawer(
     override fun tapIsOnWeather(x: Int, y: Int): Boolean {
         val drawingState = drawingState
         if( !storage.showWeather() ||
-            !storage.isUserPremium() ||
-            drawingState !is Android12DrawingState.CacheAvailable ) {
+            drawingState !is Android12DrawingState.CacheAvailable
+        ) {
             return false
         }
 
@@ -274,7 +274,7 @@ class Android12DigitalWatchFaceDrawer(
                 canvas,
                 calendar,
                 ambient,
-                storage.isUserPremium(),
+                true,
                 storage.showSecondsRing(),
                 storage.showWatchBattery(),
                 storage.showPhoneBattery(),

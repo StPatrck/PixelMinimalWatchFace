@@ -199,8 +199,8 @@ class RegularDigitalWatchFaceDrawer(
     override fun tapIsOnWeather(x: Int, y: Int): Boolean {
         val drawingState = drawingState
         if( !storage.showWeather() ||
-            !storage.isUserPremium() ||
-            drawingState !is RegularDrawerDrawingState.CacheAvailable ) {
+            drawingState !is RegularDrawerDrawingState.CacheAvailable
+        ) {
             return false
         }
 
@@ -264,7 +264,6 @@ class RegularDigitalWatchFaceDrawer(
                 canvas,
                 calendar,
                 ambient,
-                storage.isUserPremium(),
                 storage.showSecondsRing(),
                 storage.showWatchBattery(),
                 storage.showPhoneBattery(),
@@ -413,7 +412,6 @@ class RegularDigitalWatchFaceDrawer(
         canvas: Canvas,
         calendar: Calendar,
         ambient:Boolean,
-        isUserPremium: Boolean,
         drawSecondsRing: Boolean,
         drawBattery: Boolean,
         drawPhoneBattery: Boolean,
@@ -434,14 +432,13 @@ class RegularDigitalWatchFaceDrawer(
         val timeXOffset = centerX - (timePaint.measureText(timeText) / 2f)
         canvas.drawText(timeText, timeXOffset, timeYOffset, timePaint)
 
-        complicationsDrawingCache.drawComplications(canvas, ambient, calendar, isUserPremium)
+        complicationsDrawingCache.drawComplications(canvas, ambient, calendar)
 
         if( drawDate ) {
             drawDateAndWeather(
                 canvas,
                 weatherComplicationData,
                 storage.getUseShortDateFormat(),
-                isUserPremium,
                 calendar,
                 datePaint,
                 spaceBeforeWeather,
@@ -453,7 +450,7 @@ class RegularDigitalWatchFaceDrawer(
             drawSecondRing(canvas, calendar, secondsRingPaint)
         }
 
-        if( isUserPremium && (drawBattery || drawPhoneBattery) && (!ambient || !storage.hideBatteryInAmbient()) ) {
+        if( (drawBattery || drawPhoneBattery) && (!ambient || !storage.hideBatteryInAmbient()) ) {
             drawBattery(
                 canvas,
                 batteryLevelPaint,
@@ -467,7 +464,7 @@ class RegularDigitalWatchFaceDrawer(
             )
         }
 
-        if (isUserPremium && notificationsState != null && (!ambient || storage.getShowNotificationsInAmbient())) {
+        if (notificationsState != null && (!ambient || storage.getShowNotificationsInAmbient())) {
             drawNotifications(canvas, notificationsPaint, notificationsState)
         }
     }
@@ -475,10 +472,9 @@ class RegularDigitalWatchFaceDrawer(
     private fun ComplicationsDrawingCache.drawComplications(
         canvas: Canvas,
         ambient: Boolean,
-        calendar: Calendar,
-        isUserPremium: Boolean
+        calendar: Calendar
     ) {
-        if( isUserPremium && (storage.showComplicationsInAmbientMode() || !ambient) ) {
+        if( (storage.showComplicationsInAmbientMode() || !ambient) ) {
             ACTIVE_COMPLICATIONS.forEach { complicationId ->
                 val complicationDrawable = complicationDrawableSparseArray[complicationId]
 
